@@ -1,0 +1,19 @@
+package com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Repositories;
+
+import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Entities.CuentaPorCobrarEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ICuentaPorCobrarRepository extends JpaRepository<CuentaPorCobrarEntity, Long> {
+
+    List<CuentaPorCobrarEntity> findByIdSocio(Long idSocio);
+
+    List<CuentaPorCobrarEntity> findByIdPuesto(Long idPuesto);
+
+    boolean existsByIdSocioAndIdServicioAndPeriodo(Long idSocio, Long idServicio, String periodo);
+
+    boolean existsByIdPuestoAndIdServicioAndPeriodo(Long idPuesto, Long idServicio, String periodo);
+}
