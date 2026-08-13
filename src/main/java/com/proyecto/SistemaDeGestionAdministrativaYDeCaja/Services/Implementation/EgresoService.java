@@ -7,11 +7,13 @@ import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Repositories.IEgresoRe
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Services.IEgresoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +42,18 @@ public class EgresoService implements IEgresoService {
     }
 
     @Override
+    @Transactional
     public List<EgresoModel> cargarEgresosMasivos(MultipartFile archivo) {
         List<EgresoEntity> egresos = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(archivo.getInputStream()))) {
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(archivo.getInputStream(), StandardCharsets.UTF_8))) {
             String linea;
             while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue; // Ignorar líneas vacías
+
                 String[] datos = linea.split(",");
                 if (datos.length >= 4) {
-                    EgresoEntity egreso = EgresoEntity.builder() // Regla 3 (@Builder)
+                    EgresoEntity egreso = EgresoEntity.builder()
                             .proveedor(datos[0].trim())
                             .documento(datos[1].trim())
                             .monto(new BigDecimal(datos[2].trim()))
@@ -59,17 +65,19 @@ public class EgresoService implements IEgresoService {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error procesando archivo: " + e.getMessage());
+            throw new RuntimeException("Error al procesar el archivo CSV: " + e.getMessage());
         }
-        return egresoRepository.saveAll(egresos)
-                .stream()
+
+        List<EgresoEntity> guardados = egresoRepository.saveAll(egresos);
+        return guardados.stream()
                 .map(egresoMapper::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<EgresoModel> listarPorMes(int mes, int anio) {
-        return egresoRepository.findAll().stream()
+        return egresoRepository.findAll()
+                .stream()
                 .filter(e -> e.getFecha() != null && e.getFecha().getMonthValue() == mes && e.getFecha().getYear() == anio)
                 .map(egresoMapper::toModel)
                 .collect(Collectors.toList());
@@ -78,8 +86,14 @@ public class EgresoService implements IEgresoService {
     @Override
     public EgresoModel anularEgreso(Long id) {
         EgresoEntity egreso = egresoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Egreso no encontrado con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Egreso no encontrado"));
         egreso.setEstado("ANULADO");
         return egresoMapper.toModel(egresoRepository.save(egreso));
+    }
+
+    @Override
+    @Transactional
+    public void vaciarTodos() {
+        egresoRepository.deleteAll();
     }
 }

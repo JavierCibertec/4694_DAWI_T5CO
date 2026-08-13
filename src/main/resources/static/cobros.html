@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesar Cobranza</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Librerías para generación e impresión de PDFs dinámicos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="p-4 bg-light">
+<div class="container">
+    <a href="dashboard.html" class="btn btn-secondary mb-3">&larr; Volver</a>
+
+    <h2 class="mb-4">Cobranza de Cuentas Pendientes</h2>
+
+    <!-- Búsqueda por ID de Socio -->
+    <div class="card p-3 shadow-sm mb-4">
+        <div class="input-group">
+            <input type="number" id="searchSocio" class="form-control" placeholder="ID Socio (Ej: 10)" value="10">
+            <button class="btn btn-primary px-4" onclick="buscarCuentas()">Buscar Pendientes</button>
+        </div>
+    </div>
+
+    <!-- Botón de Procesar Pago -->
+    <div class="mb-3">
+        <button class="btn btn-success px-4 py-2" onclick="procesarPago()">
+            Procesar Pago y Emitir Recibo
+        </button>
+    </div>
+
+    <!-- Alerta de Notificaciones -->
+    <div id="alertBox" class="alert d-none mb-3"></div>
+
+    <!-- Tabla de cuentas_por_cobrar -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white font-weight-bold">
+            Cuentas por Cobrar Pendientes
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 bg-white">
+                <thead class="table-light">
+                <tr>
+                    <th class="text-center" style="width: 100px;">Seleccionar</th>
+                    <th>ID Cuenta</th>
+                    <th>Periodo</th>
+                    <th>Monto (S/)</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody id="tablaCuentas">
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Ingrese un ID de Socio y haga clic en "Buscar Pendientes".</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tarjeta Informativa del Recibo -->
+    <div id="reciboCard" class="card p-3 d-none bg-white border-success shadow-sm">
+        <h5 class="text-success">✔ Recibo Emitido y Descargado Con Éxito</h5>
+        <p class="mb-1"><strong>Correlativo Único:</strong> <span id="reciboCorrelativo"></span></p>
+        <p class="mb-0"><strong>Monto Total Recaudado:</strong> S/ <span id="reciboTotal"></span></p>
+    </div>
+</div>
+
+<script>
+    // Validar sesión activa
+    if (!localStorage.getItem('jwtToken')) {
+        window.location.href = 'index.html';
+    }
+
+    // Buscar cuentas del socio en el backend (GET)
+    async function buscarCuentas() {
+        const idSocio = document.getElementById('searchSocio').value;
+        if (!idSocio) return alert('Por favor ingrese un ID de Socio');
+
+        const token = localStorage.getItem('jwtToken');
+        const alertBox = document.getElementById('alertBox');
+        alertBox.classList.add('d-none');
+
+        try {
+            const res = await fetch(`/api/cuentas-por-cobrar/socio/${idSocio}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const cuentas = await res.json();
+                const tbody = document.getElementById('tablaCuentas');
+                tbody.innerHTML = '';
+
+                const pendientes = cuentas.filter(c => c.estado === 'PENDIENTE');
+
+                if (pendientes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No se encontraron cuentas pendientes para el socio ID ${idSocio}.</td></tr>`;
+                    return;
+                }
+
+                pendientes.forEach(c => {
+                    tbody.innerHTML += `<tr>
+                            <td class="text-center">
+                                <input type="checkbox" value="${c.id}" data-periodo="${c.periodo}" data-monto="${c.monto}" class="form-check-input cuenta-check">
+                            </td>
+                            <td>${c.id}</td>
+                            <td>${c.periodo}</td>
+                            <td>S/ ${c.monto}</td>
+                            <td><span class="badge bg-warning text-dark">${c.estado}</span></td>
+                        </tr>`;
+                });
+            }
+        } catch (error) {
+            console.error('Error al consultar deudas:', error);
+        }
+    }
+
+    // Procesar cobranza y emitir el PDF
+    async function procesarPago() {
+        const checkboxes = document.querySelectorAll('.cuenta-check:checked');
+        if (checkboxes.length === 0) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = 'alert alert-warning';
+            alertBox.innerText = 'Seleccione al menos una cuenta por cobrar de la tabla.';
+            alertBox.classList.remove('d-none');
+            return;
+        }
+
+        const selectedIds = [];
+        const detalleCuentas = [];
+
+        checkboxes.forEach(cb => {
+            selectedIds.push(parseInt(cb.value));
+            detalleCuentas.push({
+                id: cb.value,
+                periodo: cb.getAttribute('data-periodo'),
+                monto: cb.getAttribute('data-monto')
+            });
+        });
+
+        const token = localStorage.getItem('jwtToken');
+        try {
+            const res = await fetch('/api/pagos/procesar?usuario=admin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(selectedIds)
+            });
+
+            if (res.ok) {
+                const recibo = await res.json();
+
+                // 1. Mostrar tarjeta en pantalla
+                document.getElementById('reciboCorrelativo').innerText = recibo.correlativo;
+                document.getElementById('reciboTotal').innerText = recibo.montoTotal;
+                document.getElementById('reciboCard').classList.remove('d-none');
+
+                // 2. Generar y descargar el PDF del Recibo
+                generarPDFRecibo(recibo, detalleCuentas);
+
+                // 3. Refrescar la tabla de cuentas pendientes
+                buscarCuentas();
+            }
+        } catch (error) {
+            console.error('Error al procesar el pago:', error);
+        }
+    }
+
+    // Función para maquetar y descargar el comprobante en PDF
+    function generarPDFRecibo(recibo, detalles) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Encabezado del Comprobante
+        doc.setFontSize(18);
+        doc.setTextColor(40, 40, 40);
+        doc.text("SISTEMA DE GESTIÓN DE CAJA", 105, 20, { align: "center" });
+
+        doc.setFontSize(14);
+        doc.setTextColor(0, 102, 204);
+        doc.text(`RECIBO DE INGRESO N° ${String(recibo.correlativo).padStart(6, '0')}`, 105, 30, { align: "center" });
+
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
+
+        // Información General
+        doc.setFontSize(10);
+        doc.setTextColor(50, 50, 50);
+        doc.text(`Fecha de Emisión: ${new Date(recibo.fecha).toLocaleString()}`, 20, 45);
+        doc.text(`Cajero / Operador: ${recibo.usuarioCreacion || 'admin'}`, 20, 52);
+        doc.text(`Estado del Pago: CANCELADO / ABONADO`, 20, 59);
+
+        // Tabla de Conceptos Cobrados
+        const bodyData = detalles.map(d => [`Cuenta N° ${d.id}`, d.periodo, `S/ ${parseFloat(d.monto).toFixed(2)}`]);
+
+        doc.autoTable({
+            startY: 67,
+            head: [['Concepto / ID', 'Periodo Facturado', 'Monto Cancelado']],
+            body: bodyData,
+            theme: 'striped',
+            headStyles: { fillColor: [40, 167, 69] }
+        });
+
+        // Total
+        const finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(`TOTAL RECAUDADO: S/ ${parseFloat(recibo.montoTotal).toFixed(2)}`, 190, finalY, { align: "right" });
+
+        // Pie de página
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(120, 120, 120);
+        doc.text("Gracias por su pago. Conservar este comprobante para cualquier reclamo.", 105, finalY + 25, { align: "center" });
+
+        // Descargar el archivo PDF automáticamente
+        doc.save(`Recibo_Ingreso_${String(recibo.correlativo).padStart(6, '0')}.pdf`);
+    }
+</script>
+</body>
+</html>

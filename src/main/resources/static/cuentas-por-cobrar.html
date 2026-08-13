@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Cuenta por Cobrar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-light">
+<div class="container">
+    <a href="dashboard.html" class="btn btn-secondary mb-3">&larr; Volver</a>
+
+    <h2 class="mb-4">Registrar Cuenta por Cobrar</h2>
+
+    <div class="card p-4 shadow-sm mb-4">
+        <form id="cuentaForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">ID Puesto</label>
+                    <input type="number" id="idPuesto" class="form-control" value="2" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">ID Socio</label>
+                    <input type="number" id="idSocio" class="form-control" value="11" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">ID Servicio</label>
+                    <input type="number" id="idServicio" class="form-control" value="2" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Periodo</label>
+                    <input type="text" id="periodo" class="form-control" value="2026-09" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Monto (S/)</label>
+                    <input type="number" step="0.01" id="monto" class="form-control" value="109">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    <select id="estado" class="form-select">
+                        <option value="PENDIENTE" selected>PENDIENTE</option>
+                        <option value="ABONADO">ABONADO</option>
+                        <option value="EXONERADO">EXONERADO</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lectura Inicial</label>
+                    <input type="number" step="0.1" id="lecturaInicial" class="form-control" value="100.0">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lectura Final</label>
+                    <input type="number" step="0.1" id="lecturaFinal" class="form-control" value="150.0">
+                </div>
+
+                <div class="col-md-8 d-flex align-items-center">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="esPorConsumo" checked>
+                        <label class="form-check-label fw-bold" for="esPorConsumo">
+                            Es Por Consumo (Calcula diferencia lecturas)
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button type="submit" class="btn btn-primary px-4 py-2">Generar Cargo</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Alerta Dinámica de Confirmación -->
+    <div id="resultadoBox" class="alert alert-success d-none shadow-sm"></div>
+</div>
+
+<script>
+    // Validar token de sesión
+    if (!localStorage.getItem('jwtToken')) {
+        window.location.href = 'index.html';
+    }
+
+    document.getElementById('cuentaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Leer valores reales de los inputs
+        const esPorConsumo = document.getElementById('esPorConsumo').checked;
+        const lecturaInicial = parseFloat(document.getElementById('lecturaInicial').value) || 0;
+        const lecturaFinal = parseFloat(document.getElementById('lecturaFinal').value) || 0;
+
+        // Si es por consumo calcula la diferencia de lecturas, de lo contrario toma el campo Monto
+        let montoFinal = parseFloat(document.getElementById('monto').value) || 0;
+        if (esPorConsumo) {
+            montoFinal = Math.max(0, lecturaFinal - lecturaInicial);
+        }
+
+        const bodyPayload = {
+            idPuesto: parseInt(document.getElementById('idPuesto').value),
+            idSocio: parseInt(document.getElementById('idSocio').value),
+            idServicio: parseInt(document.getElementById('idServicio').value),
+            periodo: document.getElementById('periodo').value,
+            monto: montoFinal,
+            estado: document.getElementById('estado').value,
+            lecturaInicial: lecturaInicial,
+            lecturaFinal: lecturaFinal,
+            esPorConsumo: esPorConsumo
+        };
+
+        const token = localStorage.getItem('jwtToken');
+        const alertBox = document.getElementById('resultadoBox');
+
+        try {
+            const res = await fetch('/api/cuentas-por-cobrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(bodyPayload)
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alertBox.className = 'alert alert-success shadow-sm';
+                alertBox.innerText = `¡Cuenta Registrada! ID: ${data.id} | Estado: ${data.estado} | Monto Final: S/ ${data.monto}`;
+                alertBox.classList.remove('d-none');
+            } else {
+                alertBox.className = 'alert alert-danger shadow-sm';
+                alertBox.innerText = `Error (${res.status}): No se pudo registrar la cuenta.`;
+                alertBox.classList.remove('d-none');
+            }
+        } catch (error) {
+            alertBox.className = 'alert alert-danger shadow-sm';
+            alertBox.innerText = 'Error de conexión con el servidor.';
+            alertBox.classList.remove('d-none');
+        }
+    });
+</script>
+</body>
+</html>
