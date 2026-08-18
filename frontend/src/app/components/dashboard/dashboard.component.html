@@ -1,0 +1,67 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">Sistema de Caja</a>
+    <div class="d-flex align-items-center">
+      <!-- Muestra la identidad del usuario autenticado (RF-03) -->
+      <span class="text-light me-3">Bienvenido, <strong>{{ username }}</strong></span>
+      <button class="btn btn-outline-light btn-sm" (click)="onLogout()">Cerrar Sesión</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2 class="mb-4">Módulos del Sistema</h2>
+  <div class="row g-4">
+    <!-- Módulo 1: Cuentas por Cobrar -->
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm h-100 border-primary">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-primary">Cuentas por Cobrar</h5>
+            <p class="card-text text-muted">Registro y cálculo de lecturas de consumo de servicios.</p>
+          </div>
+          <a routerLink="/cuentas-por-cobrar" class="btn btn-primary mt-3">Ir a Módulo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 2: Caja y Cobranza -->
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm h-100 border-success">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-success">Caja y Cobranza</h5>
+            <p class="card-text text-muted">Procesamiento de pagos y emisión de recibos con correlativo.</p>
+          </div>
+          <a routerLink="/cobros" class="btn btn-success mt-3">Ir a Módulo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 3: Egresos -->
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm h-100 border-warning">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-warning">Egresos</h5>
+            <p class="card-text text-muted">Registro de gastos e importación masiva CSV.</p>
+          </div>
+          <a routerLink="/egresos" class="btn btn-warning mt-3">Ir a Módulo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 4: Reportes -->
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm h-100 border-info">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title text-info">Reportes</h5>
+            <p class="card-text text-muted">Resumen consolidado y descargas en formato Excel (.xlsx).</p>
+          </div>
+          <a routerLink="/reportes" class="btn btn-info text-white mt-3">Ir a Módulo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

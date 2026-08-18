@@ -1,0 +1,46 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Descarga de Reportes en Excel (.XLSX)</h2>
+
+  <!-- Reporte Diario -->
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="card-title text-success mb-3">1. Reporte Diario de Caja y Recibos</h5>
+    <div class="row align-items-end g-3">
+      <div class="col-md-5">
+        <label class="form-label fw-semibold">Seleccionar Fecha</label>
+        <input type="date" [(ngModel)]="fechaDiaria" name="fechaDiaria" class="form-control" />
+      </div>
+      <div class="col-md-5">
+        <button class="btn btn-success w-100" (click)="descargarDiario()">
+          Descargar Reporte Diario (.xlsx)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reporte Mensual Egresos -->
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="card-title text-warning mb-3">2. Reporte Mensual de Egresos</h5>
+    <div class="row align-items-end g-3">
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Mes</label>
+        <input type="number" [(ngModel)]="mesReporte" name="mesReporte" class="form-control" min="1" max="12" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Año</label>
+        <input type="number" [(ngModel)]="anioReporte" name="anioReporte" class="form-control" />
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-warning w-100" (click)="descargarEgresos()">
+          Descargar Egresos (.xlsx)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' mt-3'">
+    {{ mensajeAlert }}
+  </div>
+</div>

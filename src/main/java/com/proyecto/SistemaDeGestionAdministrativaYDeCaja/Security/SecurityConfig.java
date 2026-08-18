@@ -10,6 +10,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -21,20 +26,47 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Desactiva CSRF ya que se utiliza autenticación basada en tokens JWT (Stateless)
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+
+                // Habilita la configuración CORS definida en el Bean corsConfigurationSource()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // Configura la política de creación de sesiones a STATELESS (sin estado)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Definición de reglas de autorización
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Permitir acceso público al Frontend Estático (HTML, CSS, JS, imágenes, favicon)
-                        .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico").permitAll()
-                        // 2. Permitir el Login de la API REST
+                        // Permitir peticiones OPTIONS (preflight CORS enviadas por los navegadores/Angular)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Rutas públicas de autenticación y frontend estático (si aplica)
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/login").permitAll()
                         .requestMatchers("/api/usuarios/login").permitAll()
-                        // 3. Proteger todas las demás rutas de la API REST
+                        .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico").permitAll()
+
+                        // Todas las demás peticiones requieren un token JWT válido
                         .anyRequest().authenticated()
                 )
+
+                // Interceptor JWT personalizado para validar tokens Bearer
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Configuración global de CORS para permitir peticiones desde el cliente Angular (http://localhost:4200)
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

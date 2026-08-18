@@ -1,0 +1,70 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Registrar Cuenta por Cobrar</h2>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <form (ngSubmit)="generarCargo()">
+      <div class="row g-3">
+        <!-- Fila 1: Identificadores -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">ID Puesto</label>
+          <input type="number" [(ngModel)]="idPuesto" name="idPuesto" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">ID Socio</label>
+          <input type="number" [(ngModel)]="idSocio" name="idSocio" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">ID Servicio</label>
+          <input type="number" [(ngModel)]="idServicio" name="idServicio" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Periodo</label>
+          <input type="text" [(ngModel)]="periodo" name="periodo" class="form-control" placeholder="YYYY-MM" required />
+        </div>
+
+        <!-- Fila 2: Valores Financieros y Lecturas -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Monto (S/)</label>
+          <input type="number" step="0.01" [(ngModel)]="monto" name="monto" class="form-control" placeholder="Monto o Tarifa" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Estado</label>
+          <select [(ngModel)]="estado" name="estado" class="form-select" required>
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="ABONADO">ABONADO</option>
+            <option value="EXONERADO">EXONERADO</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Lectura Inicial</label>
+          <input type="number" step="0.1" [(ngModel)]="lecturaInicial" name="lecturaInicial" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Lectura Final</label>
+          <input type="number" step="0.1" [(ngModel)]="lecturaFinal" name="lecturaFinal" class="form-control" />
+        </div>
+
+        <!-- Fila 3: Switch de Consumo y Botón de Acción -->
+        <div class="col-md-8 d-flex align-items-center">
+          <div class="form-check form-switch mt-3">
+            <input class="form-check-input" type="checkbox" id="esPorConsumo" [(ngModel)]="esPorConsumo" name="esPorConsumo" />
+            <label class="form-check-label fw-bold" for="esPorConsumo">
+              Es Por Consumo (Calcula diferencia lecturas)
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-4 text-end">
+          <button type="submit" class="btn btn-primary px-5 mt-2">Generar Cargo</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Contenedor Dinámico de Alerta de Notificación -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' shadow-sm mt-3 mb-3'">
+    {{ mensajeAlert }}
+  </div>
+</div>

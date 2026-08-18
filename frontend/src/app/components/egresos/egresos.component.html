@@ -1,0 +1,73 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Carga Masiva de Egresos (CSV)</h2>
+
+  <!-- Card de Carga Masiva (CSV) -->
+  <div class="card p-4 shadow-sm mb-4">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Seleccionar archivo .CSV</label>
+      <input
+        type="file"
+        (change)="onFileSelected($event)"
+        class="form-control"
+        accept=".csv"
+      />
+    </div>
+    <div>
+      <button class="btn btn-warning px-4 fw-semibold" (click)="cargarMasivo()">
+        Procesar Carga Masiva
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerta de Notificación Dinámica -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' shadow-sm mb-4'">
+    {{ mensajeAlert }}
+  </div>
+
+  <!-- Encabezado de la Tabla y Acciones -->
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h4 class="m-0 fw-bold">Lista de Egresos Registrados</h4>
+    <button class="btn btn-outline-danger btn-sm px-3" (click)="vaciarEgresos()">
+      🗑️ Vaciar Todos los Egresos
+    </button>
+  </div>
+
+  <!-- Tabla Dinámica de Egresos -->
+  <div class="card shadow-sm mb-4">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped mb-0 bg-white">
+        <thead class="table-dark">
+        <tr>
+          <th style="width: 80px;">ID</th>
+          <th>Proveedor</th>
+          <th>Documento</th>
+          <th>Monto (S/)</th>
+          <th>Motivo</th>
+          <th style="width: 120px;">Estado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let e of egresosList">
+          <td><strong>{{ e.id }}</strong></td>
+          <td>{{ e.proveedor }}</td>
+          <td>{{ e.documento }}</td>
+          <td>S/ {{ e.monto }}</td>
+          <td>{{ e.motivo }}</td>
+          <td>
+              <span [class]="'badge ' + (e.estado === 'ACTIVO' ? 'bg-success' : 'bg-danger')">
+                {{ e.estado }}
+              </span>
+          </td>
+        </tr>
+        <tr *ngIf="egresosList.length === 0">
+          <td colspan="6" class="text-center text-muted py-4">
+            No hay egresos registrados en el sistema.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -17,41 +17,57 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UsuarioService implements IUsuarioService {
 
+
     private final IUsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final JwtUtil jwtUtil;
 
     @Override
     public UsuarioModel login(String username, String password) {
+
+        if (!"admin".equals(username) || !"123".equals(password)) {
+            return null; // Deniega el acceso si no es admin / 123
+        }
+
+
         Optional<UsuarioEntity> opt = usuarioRepository.findByUsername(username);
-        if (opt.isPresent() && opt.get().getPassword().equals(password)) {
+
+        if (opt.isPresent()) {
+
             UsuarioModel model = usuarioMapper.toModel(opt.get());
-            model.setToken(jwtUtil.generarToken(username)); // Token JWT real
+            model.setToken(jwtUtil.generarToken(username));
             return model;
         }
 
+
         UsuarioEntity adminInicial = UsuarioEntity.builder()
-                .username(username)
-                .password(password)
+                .username("admin")
+                .password("123")
                 .nombre("Admin")
                 .apellido("Sistema")
                 .rol("ADMIN")
                 .build();
-        usuarioRepository.save(adminInicial);
 
-        UsuarioModel model = usuarioMapper.toModel(adminInicial);
-        model.setToken(jwtUtil.generarToken(username)); // Token JWT real
+        UsuarioEntity guardado = usuarioRepository.save(adminInicial);
+
+
+        UsuarioModel model = usuarioMapper.toModel(guardado);
+        model.setToken(jwtUtil.generarToken("admin"));
         return model;
     }
 
     @Override
     public List<UsuarioModel> listarTodos() {
-        return usuarioRepository.findAll().stream().map(usuarioMapper::toModel).collect(Collectors.toList());
+        return usuarioRepository.findAll().stream()
+                .map(usuarioMapper::toModel)
+                .collect(Collectors.toList());
     }
 
     @Override
     public UsuarioModel obtenerPorId(Long id) {
-        return usuarioRepository.findById(id).map(usuarioMapper::toModel).orElse(null);
+        return usuarioRepository.findById(id)
+                .map(usuarioMapper::toModel)
+                .orElse(null);
     }
 
     @Override

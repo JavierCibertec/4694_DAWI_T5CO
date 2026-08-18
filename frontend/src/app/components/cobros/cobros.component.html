@@ -1,0 +1,75 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Cobranza de Cuentas Pendientes</h2>
+
+  <!-- Caja de Búsqueda Exclusiva para ID Socio -->
+  <div class="card p-3 shadow-sm mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-9">
+        <label class="form-label fw-semibold">Ingrese ID del Socio:</label>
+        <input type="number" [(ngModel)]="idSocio" name="idSocio" class="form-control" placeholder="Ej: 10" />
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100" (click)="buscarCuentas()">Buscar Pendientes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de Procesar Pago -->
+  <div class="mb-3">
+    <button class="btn btn-success px-4 py-2" (click)="procesarPago()">
+      Procesar Pago y Emitir Recibo (PDF)
+    </button>
+  </div>
+
+  <!-- Alerta de Notificaciones -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' mb-3'">
+    {{ mensajeAlert }}
+  </div>
+
+  <!-- Tabla de Cuentas Pendientes -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+      Cuentas por Cobrar Pendientes
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0 bg-white">
+        <thead class="table-light">
+        <tr>
+          <th class="text-center" style="width: 100px;">Seleccionar</th>
+          <th>ID Cuenta</th>
+          <th>ID Socio</th>
+          <th>ID Puesto</th>
+          <th>Periodo</th>
+          <th>Monto (S/)</th>
+          <th>Estado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let c of cuentasPendientes">
+          <td class="text-center">
+            <input type="checkbox" (change)="toggleSeleccion(c.id, $event)" class="form-check-input" />
+          </td>
+          <td><strong>{{ c.id }}</strong></td>
+          <td>{{ c.idSocio }}</td>
+          <td>{{ c.idPuesto }}</td>
+          <td>{{ c.periodo }}</td>
+          <td>S/ {{ c.monto }}</td>
+          <td><span class="badge bg-warning text-dark">{{ c.estado }}</span></td>
+        </tr>
+        <tr *ngIf="cuentasPendientes.length === 0">
+          <td colspan="7" class="text-center text-muted">No hay deudas cargadas para mostrar para este socio.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tarjeta de Confirmación -->
+  <div *ngIf="reciboGenerado" class="card p-3 bg-white border-success shadow-sm">
+    <h5 class="text-success">✔ Recibo Emitido y Descargado Con Éxito</h5>
+    <p class="mb-1"><strong>Correlativo Único:</strong> {{ reciboGenerado.correlativo }}</p>
+    <p class="mb-0"><strong>Monto Total Recaudado:</strong> S/ {{ reciboGenerado.montoTotal }}</p>
+  </div>
+</div>
