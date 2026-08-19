@@ -15,7 +15,7 @@ export class CuentasPorCobrarComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private apiUrl = 'http://localhost:8080/api';
 
-  // Campos del formulario de Cuenta por Cobrar
+  // Campos del formulario
   idPuesto: number = 2;
   idSocio: number = 13;
   idServicio: number = 3;
@@ -26,14 +26,14 @@ export class CuentasPorCobrarComponent implements OnInit {
   lecturaFinal: number = 150;
   esPorConsumo: boolean = true;
 
-  // Campos opcionales del socio (RF-06)
+  // Campos opcionales del socio
   nombresSocio: string = 'Javier';
   apellidosSocio: string = 'Herrera';
   accionSocio: string = 'ACC-002';
   etapaSocio: string = 'Etapa 1';
   fechaNacimientoSocio: string = '2026-08-14';
 
-  // Lista de Socios y Alertas Dinámicas
+  // Lista de Socios y Alertas
   sociosList: any[] = [];
   mensajeAlert: string = '';
   tipoAlert: string = 'info';
@@ -42,30 +42,81 @@ export class CuentasPorCobrarComponent implements OnInit {
     this.obtenerTotalSocios();
   }
 
-  // Método invocado al presionar "Mostrar Total de Socios"
   obtenerTotalSocios(): void {
     this.http.get<any[]>(`${this.apiUrl}/socios`).subscribe({
       next: (data) => {
         this.sociosList = data;
         this.mensajeAlert = `Se obtuvieron ${data.length} socios registrados en el sistema.`;
         this.tipoAlert = 'info';
-        this.cdr.detectChanges(); // Forzar renderizado inmediato
+        this.cdr.detectChanges();
       },
       error: () => {
-        // Respaldo en caso de respuesta por controlador secundario
-        this.http.get<any[]>(`${this.apiUrl}/cuentas-por-cobrar/socios`).subscribe({
-          next: (data) => {
-            this.sociosList = data;
-            this.mensajeAlert = `Se obtuvieron ${data.length} socios registrados.`;
-            this.tipoAlert = 'info';
-            this.cdr.detectChanges();
-          },
-          error: () => {
-            this.mensajeAlert = 'Error al consultar el listado total de socios en el servidor.';
-            this.tipoAlert = 'danger';
-            this.cdr.detectChanges();
-          }
-        });
+        this.mensajeAlert = 'Error al consultar el listado total de socios en el servidor.';
+        this.tipoAlert = 'danger';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Confirmación de Edición para el botón del encabezado
+  confirmarEditarSocioActual(): void {
+    if (confirm('Seguro que desea editar este usuario?')) {
+      const socioActual = this.sociosList.find(s => s.id === this.idSocio) || {
+        id: this.idSocio,
+        nombres: this.nombresSocio,
+        apellidos: this.apellidosSocio,
+        accion: this.accionSocio,
+        etapa: this.etapaSocio,
+        fechaNacimiento: this.fechaNacimientoSocio
+      };
+      this.cargarSocioEnFormulario(socioActual);
+    }
+  }
+
+  // Confirmación de Edición desde la fila de la tabla
+  confirmarEditarSocio(socio: any): void {
+    if (confirm('Seguro que desea editar este usuario?')) {
+      this.cargarSocioEnFormulario(socio);
+    }
+  }
+
+  cargarSocioEnFormulario(socio: any): void {
+    this.idSocio = socio.id;
+    this.nombresSocio = socio.nombres;
+    this.apellidosSocio = socio.apellidos;
+    this.accionSocio = socio.accion || '';
+    this.etapaSocio = socio.etapa || '';
+    this.fechaNacimientoSocio = socio.fechaNacimiento || '';
+    this.mensajeAlert = `Socio ID ${socio.id} cargado en el formulario para edición.`;
+    this.tipoAlert = 'warning';
+    this.cdr.detectChanges();
+  }
+
+  // Confirmación de Eliminación para el botón del encabezado
+  confirmarEliminarSocioActual(): void {
+    if (confirm('Seguro que desea eliminar este usuario?')) {
+      this.eliminarSocio(this.idSocio);
+    }
+  }
+
+  // Confirmación de Eliminación desde la fila de la tabla
+  confirmarEliminarSocio(id: number): void {
+    if (confirm('Seguro que desea eliminar este usuario?')) {
+      this.eliminarSocio(id);
+    }
+  }
+
+  eliminarSocio(id: number): void {
+    this.http.delete(`${this.apiUrl}/socios/${id}`).subscribe({
+      next: () => {
+        this.mensajeAlert = `Socio ID ${id} eliminado exitosamente.`;
+        this.tipoAlert = 'warning';
+        this.obtenerTotalSocios();
+      },
+      error: () => {
+        this.mensajeAlert = `Error al intentar eliminar el socio ID ${id}.`;
+        this.tipoAlert = 'danger';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -78,7 +129,6 @@ export class CuentasPorCobrarComponent implements OnInit {
       montoCalculado = Math.max(0, this.lecturaFinal - this.lecturaInicial);
     }
 
-    // 1. Payload para guardar/actualizar la información del Socio en MySQL
     const socioPayload = {
       id: this.idSocio,
       codigo: `SOC-0${this.idSocio}`,
@@ -89,7 +139,6 @@ export class CuentasPorCobrarComponent implements OnInit {
       fechaNacimiento: this.fechaNacimientoSocio
     };
 
-    // 2. Persistir primero al socio y luego registrar la cuenta por cobrar
     this.http.post<any>(`${this.apiUrl}/socios`, socioPayload).subscribe({
       next: () => {
         const cuentaPayload = {
@@ -106,10 +155,8 @@ export class CuentasPorCobrarComponent implements OnInit {
 
         this.http.post<any>(`${this.apiUrl}/cuentas-por-cobrar`, cuentaPayload).subscribe({
           next: (res) => {
-            this.mensajeAlert = `¡Cuenta y Socio Registrados Exitosamente! ID Cuenta: ${res.id} | Socio ID: ${this.idSocio} | Monto: S/ ${res.monto}`;
+            this.mensajeAlert = `¡Cuenta y Socio Registrados/Actualizados Exitosamente! ID Cuenta: ${res.id} | Socio ID: ${this.idSocio}`;
             this.tipoAlert = 'success';
-
-            // 3. Actualizar dinámicamente la lista de socios en pantalla
             this.obtenerTotalSocios();
           },
           error: () => {

@@ -79,7 +79,6 @@
           </div>
         </div>
 
-        <!-- Botones Solicitados -->
         <div class="col-md-5 text-end">
           <button type="submit" class="btn btn-primary px-4 mt-2 me-2">Generar Cargo</button>
           <button type="button" class="btn btn-outline-info px-4 mt-2" (click)="obtenerTotalSocios()">
@@ -90,44 +89,61 @@
     </form>
   </div>
 
-  <!-- Alerta de Notificación -->
+  <!-- Alerta de Notificación Dinámica -->
   <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' shadow-sm mt-3 mb-3'">
     {{ mensajeAlert }}
   </div>
 
-  <!-- Tabla del Total de Socios Registrados (RF-05) -->
+  <!-- Tabla del Listado General de Socios Registrados con Botones en la cabecera -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
       <span>Listado General de Socios Registrados</span>
-      <span class="badge bg-primary fs-6" *ngIf="sociosList.length > 0">
-        Total: {{ sociosList.length }}
-      </span>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-warning fw-semibold" (click)="confirmarEditarSocioActual()">
+          ✏️ Editar
+        </button>
+        <button class="btn btn-sm btn-danger fw-semibold" (click)="confirmarEliminarSocioActual()">
+          🗑️ Eliminar
+        </button>
+        <span class="badge bg-primary fs-6 ms-2" *ngIf="sociosList.length > 0">
+          Total: {{ sociosList.length }}
+        </span>
+      </div>
     </div>
     <div class="table-responsive">
       <table class="table table-bordered table-striped align-middle mb-0 bg-white">
         <thead class="table-light">
         <tr>
-          <th style="width: 80px;">ID</th>
+          <th style="width: 60px;">ID</th>
           <th>Código</th>
           <th>Nombres</th>
           <th>Apellidos</th>
           <th>Acción</th>
           <th>Etapa</th>
           <th>Fecha Nacimiento</th>
+          <th class="text-center" style="width: 140px;">Acciones</th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let s of sociosList">
           <td><strong>{{ s.id }}</strong></td>
-          <td><span class="badge bg-secondary">{{ s.codigo || s.id }}</span></td>
+          <td><span class="badge bg-secondary">{{ s.codigo || 'SOC-0' + s.id }}</span></td>
           <td>{{ s.nombres }}</td>
           <td>{{ s.apellidos }}</td>
           <td>{{ s.accion || '-' }}</td>
           <td>{{ s.etapa || '-' }}</td>
           <td>{{ s.fechaNacimiento || '-' }}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-warning me-1" (click)="confirmarEditarSocio(s)" title="Editar">
+              ✏️
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="confirmarEliminarSocio(s.id)" title="Eliminar">
+              🗑️
+            </button>
+          </td>
         </tr>
         <tr *ngIf="sociosList.length === 0">
-          <td colspan="7" class="text-center text-muted py-3">
+          <td colspan="8" class="text-center text-muted py-3">
             Haga clic en <strong>"Mostrar Total de Socios"</strong> para cargar la lista desde el servidor.
           </td>
         </tr>

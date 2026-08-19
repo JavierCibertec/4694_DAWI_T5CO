@@ -3,10 +3,12 @@ package com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Services.Implementati
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Entities.SocioEntity;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Mappers.SocioMapper;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Models.SocioModel;
+import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Repositories.ICuentaPorCobrarRepository;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Repositories.ISocioRepository;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Services.ISocioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 public class SocioService implements ISocioService {
 
     private final ISocioRepository socioRepository;
+    private final ICuentaPorCobrarRepository cuentaPorCobrarRepository;
     private final SocioMapper socioMapper;
 
     @Override
@@ -45,5 +48,15 @@ public class SocioService implements ISocioService {
         return socioRepository.findByCodigo(codigo)
                 .map(socioMapper::toModel)
                 .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id) {
+        // 1. Elimina primero las cuentas por cobrar vinculadas al socio
+        cuentaPorCobrarRepository.deleteByIdSocio(id);
+
+        // 2. Procede a borrar la entidad del socio
+        socioRepository.deleteById(id);
     }
 }

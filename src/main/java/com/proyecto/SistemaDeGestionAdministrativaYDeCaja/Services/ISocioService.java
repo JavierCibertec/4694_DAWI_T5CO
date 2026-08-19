@@ -8,4 +8,5 @@ public interface ISocioService {
     SocioModel guardar(SocioModel socioModel);
     SocioModel obtenerPorId(Long id);
     SocioModel obtenerPorCodigo(String codigo);
+    void eliminar(Long id);
 }
