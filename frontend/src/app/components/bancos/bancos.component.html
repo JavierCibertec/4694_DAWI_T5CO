@@ -1,0 +1,80 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Administración de Bancos</h2>
+
+  <!-- Formulario -->
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">{{ id ? 'Editar Banco' : 'Nuevo Banco' }}</h5>
+
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Nombre del Banco *</label>
+        <input type="text" class="form-control" [(ngModel)]="nombre" name="nombre" placeholder="Ej: BCP">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Número de Cuenta *</label>
+        <input type="text" class="form-control" [(ngModel)]="numeroCuenta" name="numeroCuenta">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">CCI</label>
+        <input type="text" class="form-control" [(ngModel)]="cci" name="cci">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Moneda</label>
+        <select class="form-select" [(ngModel)]="moneda" name="moneda">
+          <option value="PEN">PEN (Soles)</option>
+          <option value="USD">USD (Dólares)</option>
+        </select>
+      </div>
+      <div class="col-md-12 d-flex gap-2">
+        <button class="btn btn-primary" (click)="guardar()">
+          {{ id ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button class="btn btn-outline-secondary" (click)="limpiarFormulario()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert">
+    {{ mensajeAlert }}
+  </div>
+
+  <!-- Tabla -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+      Listado de Bancos / Cuentas Bancarias
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>N° Cuenta</th>
+            <th>CCI</th>
+            <th>Moneda</th>
+            <th style="width: 160px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bancos">
+            <td>{{ b.id }}</td>
+            <td>{{ b.nombre }}</td>
+            <td>{{ b.numeroCuenta }}</td>
+            <td>{{ b.cci || '-' }}</td>
+            <td>{{ b.moneda }}</td>
+            <td>
+              <button class="btn btn-sm btn-warning me-1" (click)="editar(b)">Editar</button>
+              <button class="btn btn-sm btn-danger" (click)="eliminar(b.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="bancos.length === 0">
+            <td colspan="6" class="text-center text-muted">No hay bancos registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

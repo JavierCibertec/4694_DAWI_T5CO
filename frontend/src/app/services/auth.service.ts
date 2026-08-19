@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
@@ -7,12 +8,13 @@ import { Observable, tap } from 'rxjs';
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
   private apiUrl = 'http://localhost:8080/api/usuarios';
 
   login(credentials: { username: string; password: string }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap(res => {
-        if (res && res.token) {
+        if (res && res.token && isPlatformBrowser(this.platformId)) {
           localStorage.setItem('jwtToken', res.token);
           localStorage.setItem('username', res.username);
         }
@@ -21,10 +23,15 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.clear();
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.clear();
+    }
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('jwtToken');
+    if (isPlatformBrowser(this.platformId)) {
+      return !!localStorage.getItem('jwtToken');
+    }
+    return false;
   }
 }

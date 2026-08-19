@@ -5,6 +5,10 @@ import { CuentasPorCobrarComponent } from './components/cuentas-por-cobrar/cuent
 import { CobrosComponent } from './components/cobros/cobros.component';
 import { EgresosComponent } from './components/egresos/egresos.component';
 import { ReportesComponent } from './components/reportes/reportes.component';
+import { PuestosComponent } from './components/puestos/puestos.component';
+import { BancosComponent } from './components/bancos/bancos.component';
+import { GirosComponent } from './components/giros/giros.component';
+import { ServiciosComponent } from './components/servicios/servicios.component';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
@@ -15,5 +19,9 @@ export const routes: Routes = [
   { path: 'cobros', component: CobrosComponent, canActivate: [authGuard] },
   { path: 'egresos', component: EgresosComponent, canActivate: [authGuard] },
   { path: 'reportes', component: ReportesComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: 'login' } // Redirige a login solo si la ruta NO existe
+  { path: 'puestos', component: PuestosComponent, canActivate: [authGuard] },
+  { path: 'bancos', component: BancosComponent, canActivate: [authGuard] },
+  { path: 'giros', component: GirosComponent, canActivate: [authGuard] },
+  { path: 'servicios', component: ServiciosComponent, canActivate: [authGuard] },
+  { path: '**', redirectTo: 'login' }
 ];

@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -12,9 +13,15 @@ import { AuthService } from '../../services/auth.service';
 export class DashboardComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
-  // Obtiene el identificador del usuario autenticado para el encabezado (RF-03)
-  username: string = localStorage.getItem('username') || 'Usuario';
+  username: string = 'Usuario';
+
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.username = localStorage.getItem('username') || 'Usuario';
+    }
+  }
 
   onLogout(): void {
     this.authService.logout();

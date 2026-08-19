@@ -1,0 +1,65 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Administración de Giros Comerciales</h2>
+
+  <!-- Formulario -->
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">{{ id ? 'Editar Giro' : 'Nuevo Giro' }}</h5>
+
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Nombre del Giro *</label>
+        <input type="text" class="form-control" [(ngModel)]="nombre" name="nombre" placeholder="Ej: Bodega, Restaurante, Farmacia">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">Descripción</label>
+        <input type="text" class="form-control" [(ngModel)]="descripcion" name="descripcion" placeholder="Descripción opcional">
+      </div>
+      <div class="col-md-3 d-flex align-items-end gap-2">
+        <button class="btn btn-primary" (click)="guardar()">
+          {{ id ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button class="btn btn-outline-secondary" (click)="limpiarFormulario()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert">
+    {{ mensajeAlert }}
+  </div>
+
+  <!-- Tabla -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+      Listado de Giros
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th style="width: 160px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let g of giros">
+            <td>{{ g.id }}</td>
+            <td>{{ g.nombre }}</td>
+            <td>{{ g.descripcion || '-' }}</td>
+            <td>
+              <button class="btn btn-sm btn-warning me-1" (click)="editar(g)">Editar</button>
+              <button class="btn btn-sm btn-danger" (click)="eliminar(g.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="giros.length === 0">
+            <td colspan="4" class="text-center text-muted">No hay giros registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

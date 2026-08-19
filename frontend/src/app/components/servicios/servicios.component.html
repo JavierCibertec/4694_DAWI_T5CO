@@ -1,0 +1,105 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Administración de Servicios</h2>
+
+  <!-- Formulario -->
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">{{ id ? 'Editar Servicio' : 'Nuevo Servicio' }}</h5>
+
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Nombre *</label>
+        <input type="text" class="form-control" [(ngModel)]="nombre" name="nombre" placeholder="Ej: Agua, Luz, Alquiler">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Recurrencia</label>
+        <select class="form-select" [(ngModel)]="recurrencia" name="recurrencia">
+          <option value="MENSUAL">Mensual</option>
+          <option value="ANUAL">Anual</option>
+          <option value="UNICO">Único</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Costo *</label>
+        <input type="number" step="0.01" class="form-control" [(ngModel)]="costo" name="costo">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Moneda</label>
+        <select class="form-select" [(ngModel)]="moneda" name="moneda">
+          <option value="PEN">PEN</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Cargo a</label>
+        <select class="form-select" [(ngModel)]="destinoCargo" name="destinoCargo">
+          <option value="PUESTO">Puesto</option>
+          <option value="SOCIO">Socio</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-center">
+        <div class="form-check form-switch mt-3">
+          <input class="form-check-input" type="checkbox" id="esPorConsumo" [(ngModel)]="esPorConsumo" name="esPorConsumo">
+          <label class="form-check-label" for="esPorConsumo">Es por consumo</label>
+        </div>
+      </div>
+      <div class="col-md-9 d-flex align-items-end gap-2">
+        <button class="btn btn-primary" (click)="guardar()">
+          {{ id ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button class="btn btn-outline-secondary" (click)="limpiarFormulario()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert">
+    {{ mensajeAlert }}
+  </div>
+
+  <!-- Tabla -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+      Listado de Servicios
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Recurrencia</th>
+            <th>Costo</th>
+            <th>Moneda</th>
+            <th>Cargo a</th>
+            <th>Por Consumo</th>
+            <th style="width: 160px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of servicios">
+            <td>{{ s.id }}</td>
+            <td>{{ s.nombre }}</td>
+            <td>{{ s.recurrencia }}</td>
+            <td>{{ s.costo }}</td>
+            <td>{{ s.moneda }}</td>
+            <td>{{ s.destinoCargo }}</td>
+            <td>
+              <span class="badge" [class.bg-success]="s.esPorConsumo" [class.bg-secondary]="!s.esPorConsumo">
+                {{ s.esPorConsumo ? 'Sí' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-warning me-1" (click)="editar(s)">Editar</button>
+              <button class="btn btn-sm btn-danger" (click)="eliminar(s.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="servicios.length === 0">
+            <td colspan="8" class="text-center text-muted">No hay servicios registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

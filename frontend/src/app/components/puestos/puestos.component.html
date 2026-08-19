@@ -1,0 +1,83 @@
+<div class="container p-4">
+  <a routerLink="/dashboard" class="btn btn-secondary mb-3">&larr; Volver al Panel</a>
+
+  <h2 class="mb-4">Administración de Puestos</h2>
+
+  <!-- Formulario -->
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">{{ id ? 'Editar Puesto' : 'Nuevo Puesto' }}</h5>
+
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Número de Puesto *</label>
+        <input type="text" class="form-control" [(ngModel)]="numeroPuesto" name="numeroPuesto">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Inquilino</label>
+        <input type="text" class="form-control" [(ngModel)]="inquilino" name="inquilino">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Vigencia</label>
+        <input type="text" class="form-control" [(ngModel)]="vigencia" name="vigencia" placeholder="Ej: 2026-2027">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">ID Giro *</label>
+        <input type="number" class="form-control" [(ngModel)]="idGiro" name="idGiro">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">ID Socio</label>
+        <input type="number" class="form-control" [(ngModel)]="idSocio" name="idSocio">
+      </div>
+      <div class="col-md-9 d-flex align-items-end gap-2">
+        <button class="btn btn-primary" (click)="guardar()">
+          {{ id ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button class="btn btn-outline-secondary" (click)="limpiarFormulario()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje -->
+  <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert">
+    {{ mensajeAlert }}
+  </div>
+
+  <!-- Tabla -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+      Listado de Puestos
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Número</th>
+            <th>Inquilino</th>
+            <th>Vigencia</th>
+            <th>ID Giro</th>
+            <th>ID Socio</th>
+            <th style="width: 160px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of puestos">
+            <td>{{ p.id }}</td>
+            <td>{{ p.numeroPuesto }}</td>
+            <td>{{ p.inquilino || '-' }}</td>
+            <td>{{ p.vigencia || '-' }}</td>
+            <td>{{ p.idGiro }}</td>
+            <td>{{ p.idSocio || '-' }}</td>
+            <td>
+              <button class="btn btn-sm btn-warning me-1" (click)="editar(p)">Editar</button>
+              <button class="btn btn-sm btn-danger" (click)="eliminar(p.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="puestos.length === 0">
+            <td colspan="7" class="text-center text-muted">No hay puestos registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
