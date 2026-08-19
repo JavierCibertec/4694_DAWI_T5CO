@@ -3,11 +3,11 @@
 
   <h2 class="mb-4">Cobranza de Cuentas Pendientes</h2>
 
-  <!-- Caja de Búsqueda Exclusiva para ID Socio -->
+  <!-- Buscador por ID Socio -->
   <div class="card p-3 shadow-sm mb-4">
     <div class="row g-2 align-items-center">
       <div class="col-md-9">
-        <label class="form-label fw-semibold">Ingrese ID del Socio:</label>
+        <label class="form-label fw-semibold">Ingrese ID / Código del Socio:</label>
         <input type="number" [(ngModel)]="idSocio" name="idSocio" class="form-control" placeholder="Ej: 10" />
       </div>
       <div class="col-md-3 d-flex align-items-end">
@@ -16,19 +16,18 @@
     </div>
   </div>
 
-  <!-- Botón de Procesar Pago -->
+  <!-- Acción de Cobro -->
   <div class="mb-3">
     <button class="btn btn-success px-4 py-2" (click)="procesarPago()">
       Procesar Pago y Emitir Recibo (PDF)
     </button>
   </div>
 
-  <!-- Alerta de Notificaciones -->
   <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' mb-3'">
     {{ mensajeAlert }}
   </div>
 
-  <!-- Tabla de Cuentas Pendientes -->
+  <!-- Tabla Dinámica con la información completa de deudas y datos del socio (RF-05) -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-dark text-white fw-bold">
       Cuentas por Cobrar Pendientes
@@ -37,9 +36,14 @@
       <table class="table table-bordered table-hover mb-0 bg-white">
         <thead class="table-light">
         <tr>
-          <th class="text-center" style="width: 100px;">Seleccionar</th>
+          <th class="text-center" style="width: 80px;">Seleccionar</th>
           <th>ID Cuenta</th>
           <th>ID Socio</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Acción</th>
+          <th>Etapa</th>
+          <th>F. Nacimiento</th>
           <th>ID Puesto</th>
           <th>Periodo</th>
           <th>Monto (S/)</th>
@@ -53,20 +57,25 @@
           </td>
           <td><strong>{{ c.id }}</strong></td>
           <td>{{ c.idSocio }}</td>
+          <td>{{ c.nombres || '-' }}</td>
+          <td>{{ c.apellidos || '-' }}</td>
+          <td>{{ c.accion || '-' }}</td>
+          <td>{{ c.etapa || '-' }}</td>
+          <td>{{ c.fechaNacimiento || '-' }}</td>
           <td>{{ c.idPuesto }}</td>
           <td>{{ c.periodo }}</td>
           <td>S/ {{ c.monto }}</td>
           <td><span class="badge bg-warning text-dark">{{ c.estado }}</span></td>
         </tr>
         <tr *ngIf="cuentasPendientes.length === 0">
-          <td colspan="7" class="text-center text-muted">No hay deudas cargadas para mostrar para este socio.</td>
+          <td colspan="12" class="text-center text-muted">No hay deudas cargadas para mostrar con este criterio.</td>
         </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Tarjeta de Confirmación -->
+  <!-- Confirmación de Pago -->
   <div *ngIf="reciboGenerado" class="card p-3 bg-white border-success shadow-sm">
     <h5 class="text-success">✔ Recibo Emitido y Descargado Con Éxito</h5>
     <p class="mb-1"><strong>Correlativo Único:</strong> {{ reciboGenerado.correlativo }}</p>

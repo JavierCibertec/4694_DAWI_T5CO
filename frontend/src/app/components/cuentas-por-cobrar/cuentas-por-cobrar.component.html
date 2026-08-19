@@ -3,17 +3,18 @@
 
   <h2 class="mb-4">Registrar Cuenta por Cobrar</h2>
 
+  <!-- Card Principal del Formulario -->
   <div class="card p-4 shadow-sm mb-4">
     <form (ngSubmit)="generarCargo()">
       <div class="row g-3">
-        <!-- Fila 1: Identificadores -->
+        <!-- Identificadores -->
         <div class="col-md-3">
           <label class="form-label fw-semibold">ID Puesto</label>
           <input type="number" [(ngModel)]="idPuesto" name="idPuesto" class="form-control" required />
         </div>
         <div class="col-md-3">
-          <label class="form-label fw-semibold">ID Socio</label>
-          <input type="number" [(ngModel)]="idSocio" name="idSocio" class="form-control" required />
+          <label class="form-label fw-semibold">ID Socio (Código)</label>
+          <input type="number" [(ngModel)]="idSocio" name="idSocio" class="form-control" placeholder="Ej: 13" required />
         </div>
         <div class="col-md-3">
           <label class="form-label fw-semibold">ID Servicio</label>
@@ -24,7 +25,29 @@
           <input type="text" [(ngModel)]="periodo" name="periodo" class="form-control" placeholder="YYYY-MM" required />
         </div>
 
-        <!-- Fila 2: Valores Financieros y Lecturas -->
+        <!-- Campos de Datos del Socio (RF-06) -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Nombres del Socio</label>
+          <input type="text" [(ngModel)]="nombresSocio" name="nombresSocio" class="form-control" placeholder="Ej: Javier" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Apellidos del Socio</label>
+          <input type="text" [(ngModel)]="apellidosSocio" name="apellidosSocio" class="form-control" placeholder="Ej: Herrera" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Acción</label>
+          <input type="text" [(ngModel)]="accionSocio" name="accionSocio" class="form-control" placeholder="Ej: ACC-002" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Etapa</label>
+          <input type="text" [(ngModel)]="etapaSocio" name="etapaSocio" class="form-control" placeholder="Ej: Etapa 1" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold">Fecha Nacimiento</label>
+          <input type="date" [(ngModel)]="fechaNacimientoSocio" name="fechaNacimientoSocio" class="form-control" />
+        </div>
+
+        <!-- Transacciones y Mediciones -->
         <div class="col-md-3">
           <label class="form-label fw-semibold">Monto (S/)</label>
           <input type="number" step="0.01" [(ngModel)]="monto" name="monto" class="form-control" placeholder="Monto o Tarifa" />
@@ -46,8 +69,8 @@
           <input type="number" step="0.1" [(ngModel)]="lecturaFinal" name="lecturaFinal" class="form-control" />
         </div>
 
-        <!-- Fila 3: Switch de Consumo y Botón de Acción -->
-        <div class="col-md-8 d-flex align-items-center">
+        <!-- Switch de Consumo y Botones de Acción -->
+        <div class="col-md-7 d-flex align-items-center">
           <div class="form-check form-switch mt-3">
             <input class="form-check-input" type="checkbox" id="esPorConsumo" [(ngModel)]="esPorConsumo" name="esPorConsumo" />
             <label class="form-check-label fw-bold" for="esPorConsumo">
@@ -56,15 +79,60 @@
           </div>
         </div>
 
-        <div class="col-md-4 text-end">
-          <button type="submit" class="btn btn-primary px-5 mt-2">Generar Cargo</button>
+        <!-- Botones Solicitados -->
+        <div class="col-md-5 text-end">
+          <button type="submit" class="btn btn-primary px-4 mt-2 me-2">Generar Cargo</button>
+          <button type="button" class="btn btn-outline-info px-4 mt-2" (click)="obtenerTotalSocios()">
+            Mostrar Total de Socios
+          </button>
         </div>
       </div>
     </form>
   </div>
 
-  <!-- Contenedor Dinámico de Alerta de Notificación -->
+  <!-- Alerta de Notificación -->
   <div *ngIf="mensajeAlert" [class]="'alert alert-' + tipoAlert + ' shadow-sm mt-3 mb-3'">
     {{ mensajeAlert }}
+  </div>
+
+  <!-- Tabla del Total de Socios Registrados (RF-05) -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+      <span>Listado General de Socios Registrados</span>
+      <span class="badge bg-primary fs-6" *ngIf="sociosList.length > 0">
+        Total: {{ sociosList.length }}
+      </span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle mb-0 bg-white">
+        <thead class="table-light">
+        <tr>
+          <th style="width: 80px;">ID</th>
+          <th>Código</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Acción</th>
+          <th>Etapa</th>
+          <th>Fecha Nacimiento</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let s of sociosList">
+          <td><strong>{{ s.id }}</strong></td>
+          <td><span class="badge bg-secondary">{{ s.codigo || s.id }}</span></td>
+          <td>{{ s.nombres }}</td>
+          <td>{{ s.apellidos }}</td>
+          <td>{{ s.accion || '-' }}</td>
+          <td>{{ s.etapa || '-' }}</td>
+          <td>{{ s.fechaNacimiento || '-' }}</td>
+        </tr>
+        <tr *ngIf="sociosList.length === 0">
+          <td colspan="7" class="text-center text-muted py-3">
+            Haga clic en <strong>"Mostrar Total de Socios"</strong> para cargar la lista desde el servidor.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
