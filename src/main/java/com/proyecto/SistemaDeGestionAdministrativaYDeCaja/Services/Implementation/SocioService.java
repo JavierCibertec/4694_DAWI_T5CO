@@ -22,14 +22,15 @@ public class SocioService implements ISocioService {
     private final SocioMapper socioMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<SocioModel> listarSocios() {
-        return socioRepository.findAll()
-                .stream()
+        return socioRepository.findAll().stream()
                 .map(socioMapper::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public SocioModel guardar(SocioModel socioModel) {
         SocioEntity entity = socioMapper.toEntity(socioModel);
         SocioEntity guardado = socioRepository.save(entity);
@@ -37,6 +38,7 @@ public class SocioService implements ISocioService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SocioModel obtenerPorId(Long id) {
         return socioRepository.findById(id)
                 .map(socioMapper::toModel)
@@ -44,6 +46,7 @@ public class SocioService implements ISocioService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SocioModel obtenerPorCodigo(String codigo) {
         return socioRepository.findByCodigo(codigo)
                 .map(socioMapper::toModel)
@@ -53,10 +56,7 @@ public class SocioService implements ISocioService {
     @Override
     @Transactional
     public void eliminar(Long id) {
-        // 1. Elimina primero las cuentas por cobrar vinculadas al socio
         cuentaPorCobrarRepository.deleteByIdSocio(id);
-
-        // 2. Procede a borrar la entidad del socio
         socioRepository.deleteById(id);
     }
 }

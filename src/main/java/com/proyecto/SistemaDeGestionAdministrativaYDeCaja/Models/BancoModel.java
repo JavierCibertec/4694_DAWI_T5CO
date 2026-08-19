@@ -7,13 +7,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UsuarioModel {
+public class BancoModel {
 
     private Long id;
-    private String username;
-    private String password;
     private String nombre;
-    private String apellido;
-    private String rol;
-    private String token;
+    private String numeroCuenta;
+    private String cci;
+    private String moneda;
 }

@@ -44,25 +44,23 @@ public class PagoService implements IPagoService {
         cuentaPorCobrarRepository.saveAll(cuentas);
 
         Long ultimo = reciboRepository.findUltimoCorrelativo().orElse(0L);
-        Long nuevoCorrelativo = ultimo + 1;
 
         ReciboEntity recibo = ReciboEntity.builder()
-                .correlativo(nuevoCorrelativo)
+                .correlativo(ultimo + 1)
                 .tipo("INGRESO")
                 .montoTotal(montoTotal)
                 .fecha(LocalDateTime.now())
                 .usuarioCreacion(usuario)
                 .build();
 
-        ReciboEntity guardado = reciboRepository.save(recibo);
-        return reciboMapper.toModel(guardado);
+        return reciboMapper.toModel(reciboRepository.save(recibo));
     }
 
     @Override
     @Transactional
     public ReciboModel canjearPorOperacionBancaria(Long idCuenta, Long idBanco, LocalDate fechaDeposito, String usuario) {
         CuentaPorCobrarEntity cuenta = cuentaPorCobrarRepository.findById(idCuenta)
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada con ID: " + idCuenta));
 
         cuenta.setEstado("ABONADO");
         cuentaPorCobrarRepository.save(cuenta);
@@ -77,8 +75,7 @@ public class PagoService implements IPagoService {
                 .usuarioCreacion(usuario)
                 .build();
 
-        ReciboEntity guardado = reciboRepository.save(reciboBancario);
-        return reciboMapper.toModel(guardado);
+        return reciboMapper.toModel(reciboRepository.save(reciboBancario));
     }
 
     @Override
@@ -87,8 +84,7 @@ public class PagoService implements IPagoService {
         LocalDateTime inicio = fecha.atStartOfDay();
         LocalDateTime fin = fecha.atTime(23, 59, 59);
 
-        return reciboRepository.findAll()
-                .stream()
+        return reciboRepository.findAll().stream()
                 .filter(r -> r.getFecha() != null && !r.getFecha().isBefore(inicio) && !r.getFecha().isAfter(fin))
                 .map(reciboMapper::toModel)
                 .collect(Collectors.toList());
@@ -97,8 +93,7 @@ public class PagoService implements IPagoService {
     @Override
     @Transactional(readOnly = true)
     public ReciboModel obtenerReciboPorCorrelativo(Long correlativo) {
-        return reciboRepository.findAll()
-                .stream()
+        return reciboRepository.findAll().stream()
                 .filter(r -> correlativo.equals(r.getCorrelativo()))
                 .findFirst()
                 .map(reciboMapper::toModel)

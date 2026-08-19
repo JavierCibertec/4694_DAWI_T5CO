@@ -13,8 +13,15 @@ public interface ICuentaPorCobrarRepository extends JpaRepository<CuentaPorCobra
 
     List<CuentaPorCobrarEntity> findByIdPuesto(Long idPuesto);
 
-    // MÉTODO REQUERIDO PARA ELIMINAR CUENTAS ASOCIADAS AL SOCIO
-    void deleteByIdSocio(Long idSocio);
+    List<CuentaPorCobrarEntity> findByEstado(String estado);
+
+    List<CuentaPorCobrarEntity> findByIdSocioAndEstado(Long idSocio, String estado);
+
+    List<CuentaPorCobrarEntity> findByIdPuestoAndEstado(Long idPuesto, String estado);
+
+    boolean existsByIdPuestoAndIdServicioAndPeriodo(Long idPuesto, Long idServicio, String periodo);
 
     boolean existsByIdSocioAndIdServicioAndPeriodo(Long idSocio, Long idServicio, String periodo);
+
+    void deleteByIdSocio(Long idSocio);
 }

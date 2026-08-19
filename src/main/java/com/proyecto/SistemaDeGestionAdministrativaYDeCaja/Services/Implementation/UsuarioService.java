@@ -8,6 +8,7 @@ import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Security.JwtUtil;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Services.IUsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,46 +18,36 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UsuarioService implements IUsuarioService {
 
-
     private final IUsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final JwtUtil jwtUtil;
 
     @Override
+    @Transactional
     public UsuarioModel login(String username, String password) {
-
-        if (!"admin".equals(username) || !"123".equals(password)) {
-            return null; // Deniega el acceso si no es admin / 123
-        }
-
-
         Optional<UsuarioEntity> opt = usuarioRepository.findByUsername(username);
-
-        if (opt.isPresent()) {
-
+        if (opt.isPresent() && opt.get().getPassword().equals(password)) {
             UsuarioModel model = usuarioMapper.toModel(opt.get());
             model.setToken(jwtUtil.generarToken(username));
             return model;
         }
 
-
         UsuarioEntity adminInicial = UsuarioEntity.builder()
-                .username("admin")
-                .password("123")
+                .username(username)
+                .password(password)
                 .nombre("Admin")
                 .apellido("Sistema")
                 .rol("ADMIN")
                 .build();
+        usuarioRepository.save(adminInicial);
 
-        UsuarioEntity guardado = usuarioRepository.save(adminInicial);
-
-
-        UsuarioModel model = usuarioMapper.toModel(guardado);
-        model.setToken(jwtUtil.generarToken("admin"));
+        UsuarioModel model = usuarioMapper.toModel(adminInicial);
+        model.setToken(jwtUtil.generarToken(username));
         return model;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UsuarioModel> listarTodos() {
         return usuarioRepository.findAll().stream()
                 .map(usuarioMapper::toModel)
@@ -64,6 +55,7 @@ public class UsuarioService implements IUsuarioService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UsuarioModel obtenerPorId(Long id) {
         return usuarioRepository.findById(id)
                 .map(usuarioMapper::toModel)
@@ -71,12 +63,15 @@ public class UsuarioService implements IUsuarioService {
     }
 
     @Override
+    @Transactional
     public UsuarioModel guardar(UsuarioModel usuarioModel) {
         UsuarioEntity entity = usuarioMapper.toEntity(usuarioModel);
-        return usuarioMapper.toModel(usuarioRepository.save(entity));
+        UsuarioEntity guardado = usuarioRepository.save(entity);
+        return usuarioMapper.toModel(guardado);
     }
 
     @Override
+    @Transactional
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
     }

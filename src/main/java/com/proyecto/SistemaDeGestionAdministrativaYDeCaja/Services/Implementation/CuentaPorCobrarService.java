@@ -22,6 +22,7 @@ public class CuentaPorCobrarService implements ICuentaPorCobrarService {
     private final CuentaPorCobrarMapper cuentaMapper;
 
     @Override
+    @Transactional
     public CuentaPorCobrarModel crearCuenta(CuentaPorCobrarModel model) {
         CuentaPorCobrarEntity entity = cuentaMapper.toEntity(model);
 
@@ -37,17 +38,17 @@ public class CuentaPorCobrarService implements ICuentaPorCobrarService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CuentaPorCobrarModel> listarPorSocio(Long idSocio) {
-        return cuentaRepository.findByIdSocio(idSocio)
-                .stream()
+        return cuentaRepository.findByIdSocio(idSocio).stream()
                 .map(cuentaMapper::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CuentaPorCobrarModel> listarPorPuesto(Long idPuesto) {
-        return cuentaRepository.findByIdPuesto(idPuesto)
-                .stream()
+        return cuentaRepository.findByIdPuesto(idPuesto).stream()
                 .map(cuentaMapper::toModel)
                 .collect(Collectors.toList());
     }
@@ -55,7 +56,7 @@ public class CuentaPorCobrarService implements ICuentaPorCobrarService {
     @Override
     @Transactional
     public List<CuentaPorCobrarModel> generarCuentasMasivasSocios(Long idServicio, String periodo, List<String> etapas, boolean deduplicar) {
-        List<CuentaPorCobrarEntity> generadas = new ArrayList<>();
+        List<CuentaPorCobrarEntity> deudas = new ArrayList<>();
 
         CuentaPorCobrarEntity cuenta = CuentaPorCobrarEntity.builder()
                 .idSocio(10L)
@@ -66,12 +67,11 @@ public class CuentaPorCobrarService implements ICuentaPorCobrarService {
                 .esPorConsumo(false)
                 .build();
 
-        if (!cuentaRepository.existsByIdSocioAndIdServicioAndPeriodo(10L, idServicio, periodo)) {
-            generadas.add(cuenta);
+        if (!deduplicar || !cuentaRepository.existsByIdSocioAndIdServicioAndPeriodo(10L, idServicio, periodo)) {
+            deudas.add(cuenta);
         }
 
-        return cuentaRepository.saveAll(generadas)
-                .stream()
+        return cuentaRepository.saveAll(deudas).stream()
                 .map(cuentaMapper::toModel)
                 .collect(Collectors.toList());
     }

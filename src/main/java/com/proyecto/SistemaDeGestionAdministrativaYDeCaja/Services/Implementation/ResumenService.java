@@ -10,6 +10,7 @@ import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Repositories.IReciboRe
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Services.IResumenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,19 +19,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ResumenService implements IResumenService {
 
-
     private final ICuentaPorCobrarRepository cuentaRepository;
     private final IReciboRepository reciboRepository;
     private final CuentaPorCobrarMapper cuentaMapper;
     private final ReciboMapper reciboMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public ResumenMovimientosModel obtenerResumenSocio(Long idSocio) {
-        List<CuentaPorCobrarModel> cuentas = cuentaRepository.findByIdSocio(idSocio)
-                .stream().map(cuentaMapper::toModel).collect(Collectors.toList());
+        List<CuentaPorCobrarModel> cuentas = cuentaRepository.findByIdSocio(idSocio).stream()
+                .map(cuentaMapper::toModel)
+                .collect(Collectors.toList());
 
-        List<ReciboModel> recibos = reciboRepository.findAll()
-                .stream().map(reciboMapper::toModel).collect(Collectors.toList());
+        List<ReciboModel> recibos = reciboRepository.findAll().stream()
+                .map(reciboMapper::toModel)
+                .collect(Collectors.toList());
 
         return ResumenMovimientosModel.builder()
                 .idEntidad(idSocio)
@@ -41,9 +44,11 @@ public class ResumenService implements IResumenService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResumenMovimientosModel obtenerResumenPuesto(Long idPuesto) {
-        List<CuentaPorCobrarModel> cuentas = cuentaRepository.findByIdPuesto(idPuesto)
-                .stream().map(cuentaMapper::toModel).collect(Collectors.toList());
+        List<CuentaPorCobrarModel> cuentas = cuentaRepository.findByIdPuesto(idPuesto).stream()
+                .map(cuentaMapper::toModel)
+                .collect(Collectors.toList());
 
         return ResumenMovimientosModel.builder()
                 .idEntidad(idPuesto)

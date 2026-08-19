@@ -10,7 +10,5 @@ public interface IEgresoService {
     List<EgresoModel> cargarEgresosMasivos(MultipartFile archivo);
     List<EgresoModel> listarPorMes(int mes, int anio);
     EgresoModel anularEgreso(Long id);
-
-
     void vaciarTodos();
 }

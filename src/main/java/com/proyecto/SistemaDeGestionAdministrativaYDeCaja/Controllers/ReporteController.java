@@ -18,13 +18,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/reportes")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class ReporteController {
 
     private final IPagoService pagoService;
     private final IEgresoService egresoService;
 
-     // Reporte 1: Movimientos / Recibos Diarios en Excel (.xlsx) - RF-32
     @GetMapping("/excel/diario")
     public ResponseEntity<byte[]> descargarReporteDiario(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) throws IOException {
@@ -38,8 +38,6 @@ public class ReporteController {
                 .body(excelContent);
     }
 
-
-     // Reporte 2: Egresos Mensuales en Excel (.xlsx) - RF-33
     @GetMapping("/excel/egresos-mensual")
     public ResponseEntity<byte[]> descargarEgresosMensual(
             @RequestParam int mes,

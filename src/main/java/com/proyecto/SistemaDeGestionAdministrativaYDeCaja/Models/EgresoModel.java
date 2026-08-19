@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class EgresoModel {
+
     private Long id;
     private String proveedor;
     private String documento;

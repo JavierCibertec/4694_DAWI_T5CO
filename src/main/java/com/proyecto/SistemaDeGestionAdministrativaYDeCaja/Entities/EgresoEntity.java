@@ -13,9 +13,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class EgresoEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String proveedor;
     private String documento;
     private LocalDate fecha;

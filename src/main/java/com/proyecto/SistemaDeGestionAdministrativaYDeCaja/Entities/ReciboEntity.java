@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ReciboEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +22,12 @@ public class ReciboEntity {
     private Long correlativo;
 
     private String tipo;
+
+    @Column(name = "monto_total")
     private BigDecimal montoTotal;
+
     private LocalDateTime fecha;
+
+    @Column(name = "usuario_creacion")
     private String usuarioCreacion;
 }

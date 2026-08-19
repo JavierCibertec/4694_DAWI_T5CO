@@ -3,6 +3,7 @@ package com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Controllers;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Models.CuentaPorCobrarModel;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Services.ICuentaPorCobrarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cuentas-por-cobrar")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class CuentaPorCobrarController {
 
@@ -17,7 +19,7 @@ public class CuentaPorCobrarController {
 
     @PostMapping
     public ResponseEntity<CuentaPorCobrarModel> crear(@RequestBody CuentaPorCobrarModel model) {
-        return ResponseEntity.ok(cuentaService.crearCuenta(model));
+        return ResponseEntity.status(HttpStatus.CREATED).body(cuentaService.crearCuenta(model));
     }
 
     @GetMapping("/socio/{idSocio}")

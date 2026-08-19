@@ -26,47 +26,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Desactiva CSRF ya que se utiliza autenticación basada en tokens JWT (Stateless)
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // Habilita la configuración CORS definida en el Bean corsConfigurationSource()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Configura la política de creación de sesiones a STATELESS (sin estado)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Definición de reglas de autorización
                 .authorizeHttpRequests(auth -> auth
-                        // Permitir peticiones OPTIONS (preflight CORS enviadas por los navegadores/Angular)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Rutas públicas de autenticación y frontend estático (si aplica)
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios/login").permitAll()
                         .requestMatchers("/api/usuarios/login").permitAll()
                         .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico").permitAll()
-
-                        // Todas las demás peticiones requieren un token JWT válido
                         .anyRequest().authenticated()
                 )
-
-                // Interceptor JWT personalizado para validar tokens Bearer
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /**
-     * Configuración global de CORS para permitir peticiones desde el cliente Angular (http://localhost:4200)
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setAllowCredentials(true);
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

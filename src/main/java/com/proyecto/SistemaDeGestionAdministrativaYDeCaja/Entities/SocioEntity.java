@@ -24,5 +24,7 @@ public class SocioEntity {
     private String apellidos;
     private String accion;
     private String etapa;
+
+    @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ReciboModel {
+
     private Long id;
     private Long correlativo;
     private String tipo;

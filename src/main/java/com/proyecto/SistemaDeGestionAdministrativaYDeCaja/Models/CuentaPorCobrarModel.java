@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class CuentaPorCobrarModel {
+
     private Long id;
     private Long idPuesto;
     private Long idSocio;

@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface ISocioRepository extends JpaRepository<SocioEntity, Long> {
+
     Optional<SocioEntity> findByCodigo(String codigo);
 }

@@ -3,6 +3,7 @@ package com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Mappers;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Entities.SocioEntity;
 import com.proyecto.SistemaDeGestionAdministrativaYDeCaja.Models.SocioModel;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 
 @Component
@@ -30,8 +31,7 @@ public class SocioMapper {
                 .apellidos(model.getApellidos())
                 .accion(model.getAccion())
                 .etapa(model.getEtapa())
-                .fechaNacimiento(model.getFechaNacimiento() != null && !model.getFechaNacimiento().isEmpty()
-                        ? LocalDate.parse(model.getFechaNacimiento()) : null)
+                .fechaNacimiento(model.getFechaNacimiento() != null && !model.getFechaNacimiento().isBlank() ? LocalDate.parse(model.getFechaNacimiento()) : null)
                 .build();
     }
 }

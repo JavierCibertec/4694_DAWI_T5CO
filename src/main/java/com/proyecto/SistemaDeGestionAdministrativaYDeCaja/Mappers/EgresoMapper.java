@@ -28,7 +28,7 @@ public class EgresoMapper {
                 .id(model.getId())
                 .proveedor(model.getProveedor())
                 .documento(model.getDocumento())
-                .fecha(model.getFecha() != null ? LocalDate.parse(model.getFecha()) : null)
+                .fecha(model.getFecha() != null && !model.getFecha().isBlank() ? LocalDate.parse(model.getFecha()) : null)
                 .monto(model.getMonto())
                 .motivo(model.getMotivo())
                 .estado(model.getEstado())

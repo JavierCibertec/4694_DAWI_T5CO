@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class UsuarioController {
 
@@ -41,8 +42,7 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioModel> guardar(@RequestBody UsuarioModel usuarioModel) {
-        UsuarioModel guardado = usuarioService.guardar(usuarioModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.guardar(usuarioModel));
     }
 
     @DeleteMapping("/{id}")
